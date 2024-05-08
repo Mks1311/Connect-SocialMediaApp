@@ -36,14 +36,17 @@ function SignUpForm() {
   })
 
   async function getUserData(){
+    setLoading(true);
     try {
       const currentUser=await authService.getCurrentUserData()
       console.log(currentUser);
       if(currentUser){
         navigate("/home")
       }
+      setLoading(false)
       
     } catch (error) {
+      setLoading(false)
       console.log("SignInForm::getUserData::",error);
       
     }
