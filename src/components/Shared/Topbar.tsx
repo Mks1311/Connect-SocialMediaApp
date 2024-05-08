@@ -26,7 +26,7 @@ function Topbar() {
             })
         }
         else {
-            navigate("/");
+            navigate("/home");
         }
         setLoading(true);
     }
