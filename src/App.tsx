@@ -14,13 +14,13 @@ function App() {
 
                 <Route element={<AuthLayout />}>
                     {/*public routes */}
-                    <Route index path="/sign-in" element={<SignInForm />} />
+                    <Route index element={<SignInForm />} />
                     <Route path="/sign-up" element={<SignUpForm />} />
                 </Route>
 
                 <Route element={<RootLayout />}>
                     {/*private routes */}
-                    <Route path="/"  element={<Home />} />
+                    <Route path="/home"  element={<Home />} />
                     <Route path="/explore" element={<Explore />} />
                     <Route path="/all-users" element={<AllUsers />} />
                     <Route path="/create-post" element={<CreatePost />} />
