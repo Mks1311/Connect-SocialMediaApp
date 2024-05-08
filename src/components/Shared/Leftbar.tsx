@@ -27,7 +27,7 @@ function Leftbar() {
       })
     }
     else {
-      navigate("/sign-in");
+      navigate("/");
     }
     setLoading(false)
   }
@@ -56,7 +56,7 @@ function Leftbar() {
         </Link>
         <ul className='flex flex-col gap-6'>
           {sidebarLinks.map((link: INavLink) => {
-            const isActive = pathname == link.route
+            const isActive = ((pathname == link.route) || (pathname==`/profile/${user.id}/saved-posts`))
             return (
               <li key={link.label}
                 className={`leftsidebar-link group ${isActive && "bg-primary-500"}`}>

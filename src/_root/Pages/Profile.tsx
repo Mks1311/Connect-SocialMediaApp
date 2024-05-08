@@ -62,14 +62,6 @@ function Profile() {
                     @{currentUserData.username}
                   </p>
                 </div>
-
-                {/* <div className="flex gap-8 mt-10 items-center justify-center xl:justify-start flex-wrap z-20">
-                  <StatBlock value={currentUserData.posts.length} label="Posts" />
-                  <StatBlock value={20} label="Followers" />
-                  <StatBlock value={20} label="Following" />
-                  Post,follower,followers
-                </div> */}
-
                 <p className="small-medium md:base-medium text-center xl:text-left mt-7 max-w-screen-sm">
                   {currentUserData.bio}
                 </p>
@@ -100,7 +92,7 @@ function Profile() {
           <div className="flex max-w-5xl w-full">
             <Link
               to={`/profile/${id}`}
-              className={`profile-tab rounded-l-lg ${pathname === `/profile/${id}` && "!bg-dark-3"
+              className={`profile-tab rounded-l-lg ${pathname === `/profile/${id}` && "!bg-zinc-900"
                 }`}>
               <img
                 src={"/Icons/posts.svg"}
@@ -114,7 +106,7 @@ function Profile() {
               <>
                 <Link
                   to={`/profile/${id}/liked-posts`}
-                  className={`profile-tab rounded-r-lg ${pathname === `/profile/${id}/liked-posts` && "!bg-dark-3"
+                  className={`profile-tab rounded-r-lg ${pathname === `/profile/${id}/liked-posts` && "!bg-zinc-900"
                     }`}>
                   <img
                     src={"/Icons/like.svg"}
@@ -127,7 +119,7 @@ function Profile() {
 
                 <Link
                   to={`/profile/${id}/saved-posts`}
-                  className={`profile-tab rounded-r-lg ${pathname === `/profile/${id}/saved-posts` && "!bg-dark-3"
+                  className={`profile-tab rounded-r-lg ${pathname === `/profile/${id}/saved-posts` && "!bg-zinc-900"
                     }`}>
                   <img
                     src={"/Icons/save.svg"}
