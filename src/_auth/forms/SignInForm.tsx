@@ -1,4 +1,4 @@
-import { string, z } from "zod"
+import { z } from "zod"
 // import { useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -56,17 +56,20 @@ function SignInForm() {
       });
 
       if (!signIn) {
+        setLoading(false)
         toast({ title: "Something went wrong. Please try again", });
         return;
       }
       const isLoggedIn = await authService.getCurrentUser();
 
       if (isLoggedIn) {
+        setLoading(false)
         console.log("logged in");
         form.reset();
         navigate("/");
       } 
       else {
+        setLoading(false)
         console.log("no logged in");
         toast({ title: "Login failed. Please try again.", });
         return;
@@ -75,7 +78,7 @@ function SignInForm() {
     } catch (error) {
       console.log("sign-up form onsubmit", error);
     }
-    setLoading(true)
+    setLoading(false)
   }
 
   return (

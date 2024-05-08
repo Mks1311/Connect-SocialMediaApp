@@ -4,7 +4,7 @@ import PostCard from "@/components/Shared/PostCard";
 import Loader from "@/components/Shared/Loader";
 
 function Home() {
-  const [currentPost, setCurrentPost] = useState({});
+  const [currentPost, setCurrentPost] =useState<any>(null);
   const [loading,setLoading]=useState(true);
   async function getCurrentposts() {
     try {
@@ -33,7 +33,7 @@ function Home() {
             <Loader/>
           ):(
             <ul className="flex flex-col flex-1 gap-9 w-full">
-            {currentPost?.documents?.map((post=>(
+            {currentPost?.documents?.map(((post:any)=>(
               <PostCard post={post} key={post?.caption}/>
             )))}
           </ul>

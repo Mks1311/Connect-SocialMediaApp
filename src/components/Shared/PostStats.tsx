@@ -2,7 +2,6 @@ import authService from "@/lib/appwrite/AuthService";
 import { Models } from "appwrite"
 import { useEffect, useState } from "react";
 import { checkIsPresent } from "@/lib/utils";
-import { useAppSelector } from "@/hooks";
 import Loader from "./Loader";
 
 type PostStatProps = {

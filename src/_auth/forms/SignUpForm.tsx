@@ -17,7 +17,6 @@ import { SignupValidation } from "@/lib/Validation"
 import Loader from "@/components/Shared/Loader"
 import { Link , useNavigate } from "react-router-dom"
 import authService from "@/lib/appwrite/AuthService"
-import { useAppSelector} from '@/hooks'
 import { useState } from "react"
 
 

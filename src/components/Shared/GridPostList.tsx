@@ -1,9 +1,8 @@
 import { Models } from "appwrite";
-import { Link, Routes, Route } from "react-router-dom";
+import { Link} from "react-router-dom";
 
 import PostStats from "@/components/Shared/PostStats"
 import { useAppSelector } from "@/hooks";
-import { Profile } from "@/_root/Pages";
 
 type GridPostListProps = {
   posts: Models.Document[];

@@ -1,9 +1,8 @@
-import React from 'react'
 
 function Explore() {
   return (
     <div>
-      
+      Work to do
     </div>
   )
 }

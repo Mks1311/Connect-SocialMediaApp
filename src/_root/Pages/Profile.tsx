@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import authService from '@/lib/appwrite/AuthService';
 import Loader from '@/components/Shared/Loader';
 import { useAppSelector } from '@/hooks';
-import { Routes, Route, Outlet } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import GridPostList from '@/components/Shared/GridPostList';
 import LikedPosts from './LikedPosts';
 import SavedPosts from './SavedPosts';

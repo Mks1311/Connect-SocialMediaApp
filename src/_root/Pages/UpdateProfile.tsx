@@ -1,9 +1,8 @@
-import React from 'react'
 
 function UpdateProfile() {
   return (
     <div>
-      
+      work to do
     </div>
   )
 }

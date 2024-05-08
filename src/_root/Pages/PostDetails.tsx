@@ -1,9 +1,8 @@
-import React from 'react'
 
 function PostDetails() {
   return (
     <div>
-      
+      work to do
     </div>
   )
 }
