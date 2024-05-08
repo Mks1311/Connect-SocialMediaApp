@@ -1,0 +1,420 @@
+import config from "./config";
+import { Client, Account, ID, Avatars, Databases, Query, Storage, ImageGravity } from "appwrite";
+import { INewUser, INewPost } from "@/types";
+import { setLoading, setUser, setIsAuthenticated } from "@/features/auth/AuthSlice";
+import { store } from "@/store";
+
+
+
+export class AuthService {
+    client = new Client();
+    account;
+    avatars;
+    databases;
+    storage;
+    constructor() {
+        this.client
+            .setEndpoint(config.appwriteUrl)
+            .setProject(config.appwriteProjectId);
+
+        this.account = new Account(this.client)
+        this.avatars = new Avatars(this.client)
+        this.databases = new Databases(this.client)
+        this.storage = new Storage(this.client)
+
+    }
+
+    //USER
+    async getUserById(userId:string){
+        try {
+            const user=await this.databases.getDocument(
+                config.appwriteDBId,
+                config.appwriteUserCollectionId,
+                userId
+            )
+            if(!user) throw Error
+            return user;
+        } catch (error) {
+            console.log("AuthSerive::getUserById::",error);
+            
+        }
+    }
+
+    async getUsers(limit?: number) {
+        const queries: any[] = [Query.orderDesc("$createdAt")];
+      
+        if (limit) {
+          queries.push(Query.limit(limit));
+        }
+      
+        try {
+          const users = await this.databases.listDocuments(
+            config.appwriteDBId,
+            config.appwriteUserCollectionId,
+            queries
+          );
+      
+          if (!users) throw Error;
+      
+          return users;
+        } catch (error) {
+          console.log(error);
+        }
+      }
+
+
+    //POSTS
+    async uploadFile(file: File) {
+        try {
+            const uploadedFile = await this.storage.createFile(
+                config.appwriteBucketId,
+                ID.unique(),
+                file
+            );
+
+            console.log("uploadFile ::", uploadedFile);
+
+
+            return uploadedFile;
+        }
+        catch (error) {
+            console.log("AuthService :: uploadFile :: ", error);
+        }
+    }
+
+    async createPost(post: INewPost) {
+        try {
+            // Upload file to appwrite storage
+            const uploadedFile = await this.uploadFile(post.file[0]);
+
+            if (!uploadedFile) throw Error;
+
+            // Get file url
+            const fileUrl = await this.getFilePreview(uploadedFile.$id);
+            if (!fileUrl) {
+                await this.deleteFile(uploadedFile.$id);
+                console.log("AuthService :: createPost :: fileUrl ");
+                throw Error;
+            }
+
+            // Convert tags into array
+            const tags = post.tags?.replace(/ /g, "").split(",") || [];
+
+            // Create post
+            const newPost = await this.databases.createDocument(
+                config.appwriteDBId,
+                config.appwritePostCollectionId,
+                ID.unique(),
+                {
+                    creator: post.userId,
+                    caption: post.caption,
+                    imageUrl: fileUrl,
+                    imageId: uploadedFile.$id,
+                    location: post.location,
+                    tags: tags,
+                }
+            );
+
+            if (!newPost) {
+                await this.deleteFile(uploadedFile.$id);
+                console.log("AuthService :: createPost :: newPost ");
+                throw Error;
+            }
+
+            return newPost;
+        } catch (error) {
+            console.log("AuthService :: createPost :: ", error);
+        }
+    }
+
+    async getFilePreview(fileId: string) {
+        try {
+            const fileUrl = this.storage.getFilePreview(
+                config.appwriteBucketId,
+                fileId,
+                2000,
+                2000,
+                ImageGravity.Center,           // crop center
+                90,               // slight compression
+            );
+
+            if (!fileUrl) {
+                console.log("AuthService :: getFilePreview :: fileUrl ");
+                throw Error;
+            }
+            return fileUrl
+        } catch (error) {
+            console.log("AuthService :: getFilePreview :: ", error);
+        }
+    }
+
+    async deleteFile(fileId: string) {
+        try {
+            await this.storage.deleteFile(config.appwriteBucketId, fileId);
+
+            return { status: "ok" };
+        } catch (error) {
+            console.log("AuthService :: deleteFile :: ", error);
+        }
+    }
+
+    async getRecentPost() {
+        const posts = await this.databases.listDocuments(
+            config.appwriteDBId,
+            config.appwritePostCollectionId,
+            [Query.orderDesc("$createdAt"), Query.limit(20)]
+        )
+        if (!posts) {
+            console.log("AuthService::getRecentPost::")
+        }
+        return posts;
+    }
+
+    async LikePost(postId: string, likesArr: string[]) {
+        try {
+            const updatePost = await this.databases.updateDocument(
+                config.appwriteDBId,
+                config.appwritePostCollectionId,
+                postId,
+                {
+                    likes: likesArr
+                }
+            )
+            if (!updatePost) {
+                console.log("AuthService :: LikePost :: updatePost");
+
+            }
+            return updatePost
+        } catch (error) {
+            console.log("AuthService :: LikePost :: ", error);
+        }
+    }
+
+    async SavePost(userId: string, postId: string) {
+        try {
+            const updatedPost = await this.databases.createDocument(
+                config.appwriteDBId,
+                config.appwriteSaveCollectionId,
+                ID.unique(),
+                {
+                    user: userId,
+                    post: postId,
+                    userId:userId,
+                }
+            );
+
+            if (!updatedPost) throw Error;
+
+            return updatedPost;
+        } catch (error) {
+            console.log("AuthService :: SavePost :: ", error);
+        }
+    }
+
+    async deleteSavePost(savedRecordId: string) {
+        console.log("savedRecordId",savedRecordId);
+        
+        try {
+            const statusCode = await this.databases.deleteDocument(
+                config.appwriteDBId,
+                config.appwriteSaveCollectionId,
+                savedRecordId,
+            )
+            if (!statusCode) {
+                console.log("AuthService :: deleteSavePost :: statusCode");
+
+            }
+            return { status: 'ok' }
+        } catch (error) {
+            console.log("AuthService :: deleteSavePost :: ", error);
+        }
+    }
+
+    async getSavedPost(){
+        try {
+            const currentUser = await this.account.get();
+            if (!currentUser) {
+                console.log("Error :: Appwrite Service :: getSavedPost :: currentUser");
+                throw Error
+            }
+            const currentUserData = await this.databases.listDocuments(
+                config.appwriteDBId,
+                config.appwriteSaveCollectionId,
+            )
+            if (!currentUserData) {
+                console.log("Error :: Appwrite Service :: getSavedPost :: currentUser");
+                throw Error
+            }
+            console.log("getSavedPost",currentUserData);            
+            return currentUserData
+        } catch (error) {
+            console.log("Authservice::getSavedPost::",error);
+        }
+    }
+
+    //AUTHORIZATION
+
+    async createUserAccount(user: INewUser) {
+        const { dispatch } = store
+        dispatch(setLoading(true));
+        try {
+            const newAccount = await this.account.create(
+                ID.unique(),
+                user.email,
+                user.password,
+                user.name,
+            );
+            if (!newAccount) throw Error;
+
+            const avatarUrl = this.avatars.getInitials(user.name);
+
+            const newUser = await this.saveUserToDB({
+                accountId: newAccount.$id,
+                name: newAccount.name,
+                email: newAccount.email,
+                username: user.username,
+                imageUrl: avatarUrl,
+            })
+            const userdata = await this.getCurrentUser()
+            if (!userdata) {
+                console.log("Error Authservice :: in createaccount/getcurrentuser");
+            }
+            return newUser;
+        } catch (error) {
+            const { dispatch } = store
+            dispatch(setLoading(false));
+            console.log("Error :: Appwrite Service :: createAccount", (error));
+        }
+    }
+
+    async LogIn(user: {
+        email: string,
+        password: string
+    }) {
+        console.log("authservice :: log in", user.email, user.password);
+        try {
+            const session = await this.account.createEmailPasswordSession(user.email, user.password);
+            if (session) {
+                console.log("in session", session);
+
+                const userdata = await this.getCurrentUser()
+                if (!userdata) {
+                    console.log("userData::LogIn::AuthService", userdata);
+
+                    console.log("Error Authservice :: in login/getcurrentuser");
+                }
+            }
+            return session
+        }
+        catch (error) {
+            console.log("Error :: Appwrite Service :: LogIn", error);
+        }
+    }
+
+    async getCurrentUserData() {
+        try {
+            const currentUser = await this.account.get();
+            if (!currentUser) {
+                console.log("Error :: Appwrite Service :: getCurrentUser :: currentUser");
+                throw Error
+            }
+            const currentUserData = await this.databases.listDocuments(
+                config.appwriteDBId,
+                config.appwriteUserCollectionId,
+                [
+                    Query.equal('accountId', currentUser.$id)
+                ]
+            )
+            if (!currentUserData) {
+                console.log("Error :: Appwrite Service :: getCurrentUser :: currentUser");
+                throw Error
+            }
+
+            const currentAccount = currentUserData.documents[0];
+            if (!currentAccount) {
+                console.log("Authservice::getCurrentUserData::currentAccount");
+            }
+            return currentAccount
+        }
+        catch(error){
+            console.log("Authservice::getCurrentUserData::",error);
+            
+        }
+    }
+
+
+
+    async getCurrentUser() {
+        // const dispatch=useDispatch<useAppDispatch>();
+        //cant pass hook direclty in class component
+        try {
+            const { dispatch } = store
+            dispatch(setLoading(true));
+            const currentAccount = await this.getCurrentUserData()
+            if (currentAccount) {
+                dispatch(setUser({
+                    id: currentAccount?.$id,
+                    name: currentAccount?.name,
+                    username: currentAccount?.username,
+                    email: currentAccount?.email,
+                    imageUrl: currentAccount?.imageUrl,
+                    bio: currentAccount?.bio,
+                }));
+                dispatch(setIsAuthenticated(true));
+            }
+            else {
+                console.log("getCurrentUser::no currenctAccount");
+
+            }
+            dispatch(setLoading(false));
+            return true;
+        } catch (error) {
+            console.log("Error :: Appwrite Service :: getCurrentUser", error);
+        }
+        return null;
+    }
+
+    async LogOut() {
+        const { dispatch } = store
+        try {
+            await this.account.deleteSessions();
+            dispatch(setUser({
+                id: '',
+                name: '',
+                username: '',
+                email: '',
+                imageUrl: '',
+                bio: '',
+            }))
+            dispatch(setIsAuthenticated(false))
+            return true
+        } catch (error) {
+            console.log("Error :: Appwrite Service :: LogOut", error);
+        }
+    }
+
+    async saveUserToDB(user: {
+        accountId: string,
+        username: string,
+        email: string,
+        name: string,
+        imageUrl: URL,
+    }) {
+        try {
+            const newUser = await this.databases.createDocument(
+                config.appwriteDBId,
+                config.appwriteUserCollectionId,
+                ID.unique(),
+                user
+            )
+            return newUser;
+
+        } catch (error) {
+            console.log("Error :: saveUserToDB :: ", error);
+        }
+    }
+}
+
+const authService = new AuthService();
+
+export default authService;
