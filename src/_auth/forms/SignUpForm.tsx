@@ -164,7 +164,7 @@ function SignUpForm() {
           </Button>
           <p className="text-small-regular text-light-2 text-center">
             Already have an account?
-            <Link to="/sign-in" className="text-primary-500 text-small-semibold ml-1">Log In</Link>
+            <Link to="/" className="text-primary-500 text-small-semibold ml-1">Log In</Link>
           </p>
         </form>
       </div >
