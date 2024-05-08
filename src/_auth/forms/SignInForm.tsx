@@ -66,7 +66,7 @@ function SignInForm() {
         setLoading(false)
         console.log("logged in");
         form.reset();
-        navigate("/");
+        navigate("/home");
       } 
       else {
         setLoading(false)

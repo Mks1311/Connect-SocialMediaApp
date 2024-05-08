@@ -58,14 +58,14 @@ function SignUpForm() {
 
       if (!signIn) {
         toast({ title: "Something went wrong. Please login to your new account", });
-        navigate("/sign-in");
+        navigate("/");
         return;
       }
       const isLoggedIn = await authService.getCurrentUser();
 
       if (isLoggedIn) {
         form.reset();
-        navigate("/");
+        navigate("/home");
       } 
       else {
         toast({ title: "Login failed. Please try again.", });
