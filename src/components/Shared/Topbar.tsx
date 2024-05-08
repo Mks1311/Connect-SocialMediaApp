@@ -26,7 +26,7 @@ function Topbar() {
             })
         }
         else {
-            navigate("/sign-in");
+            navigate("/");
         }
         setLoading(true);
     }
@@ -34,7 +34,7 @@ function Topbar() {
     return (
         <section className="topbar">
             <div className="flex-between py-4 px-5">
-                <Link to="/" className="flex gap-3 items-center">
+                <Link to="/home" className="flex gap-3 items-center">
                     <img src="/Images/logo2.png"
                         alt="logo"
                         width={130}
