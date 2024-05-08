@@ -17,7 +17,7 @@ import { SignupValidation } from "@/lib/Validation"
 import Loader from "@/components/Shared/Loader"
 import { Link , useNavigate } from "react-router-dom"
 import authService from "@/lib/appwrite/AuthService"
-import { useState } from "react"
+import { useState,useEffect } from "react"
 
 
 function SignUpForm() {
@@ -34,6 +34,24 @@ function SignUpForm() {
       password: "",
     },
   })
+
+  async function getUserData(){
+    try {
+      const currentUser=await authService.getCurrentUserData()
+      console.log(currentUser);
+      if(currentUser){
+        navigate("/home")
+      }
+      
+    } catch (error) {
+      console.log("SignInForm::getUserData::",error);
+      
+    }
+  }
+
+  useEffect(() => {
+    getUserData()
+  }, []);
 
 
   async function onSubmit(values: z.infer<typeof SignupValidation>) {

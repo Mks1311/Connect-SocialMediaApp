@@ -1,9 +1,8 @@
 import { z } from "zod"
-// import { useEffect } from "react"
+import { useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
-// import { ToastAction } from "@/components/ui/toast"
 import { useToast } from "@/components/ui/use-toast"
 import {
   Form,
@@ -19,11 +18,13 @@ import Loader from "@/components/Shared/Loader"
 import { Link , useNavigate } from "react-router-dom"
 import authService from "@/lib/appwrite/AuthService"
 import { useState } from "react"
+import { useAppSelector } from "@/hooks"
 
 function SignInForm() {
   const { toast } = useToast()
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const isAuth=useAppSelector((state=>state.auth.isAuthenticated))
 
   const form = useForm<z.infer<typeof SigninValidation>>({
     resolver: zodResolver(SigninValidation),
@@ -33,18 +34,27 @@ function SignInForm() {
     },
   })
 
-  // useEffect(() => {
-  //   const cookieFallback = localStorage.getItem("cookieFallback");
-  //   if (
-  //     cookieFallback === "[]" ||
-  //     cookieFallback === null ||
-  //     cookieFallback === undefined
-  //   ) {
-  //     navigate("/sign-in");
-  //   }
+  async function getUserData(){
+    try {
+      const currentUser=await authService.getCurrentUserData()
+      console.log(currentUser);
+      if(currentUser){
+        navigate("/home")
+      }
+      
+    } catch (error) {
+      console.log("SignInForm::getUserData::",error);
+      
+    }
+  }
 
-  //   authService.getCurrentUser();
-  // }, []);
+  useEffect(() => {
+    console.log(isAuth);
+    getUserData()
+    if(isAuth){
+      navigate("/home")
+    }
+  }, []);
 
   async function onSubmit(values: z.infer<typeof SigninValidation>) {
     setLoading(true)
@@ -64,7 +74,7 @@ function SignInForm() {
 
       if (isLoggedIn) {
         setLoading(false)
-        console.log("logged in");
+        console.log("logged in");11
         form.reset();
         navigate("/home");
       } 
