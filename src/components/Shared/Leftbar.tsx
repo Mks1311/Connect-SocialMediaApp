@@ -15,6 +15,8 @@ function Leftbar() {
   const navigate = useNavigate()
   const user = useAppSelector((state) => state.auth.user)
   const [loading, setLoading] = useState(false);
+  console.log("pathname",pathname);
+  
 
   async function logoutClick() {
     setLoading(true)
@@ -56,10 +58,12 @@ function Leftbar() {
         </Link>
         <ul className='flex flex-col gap-6'>
           {sidebarLinks.map((link: INavLink) => {
-            const isActive = ((pathname == link.route) || (pathname==`/profile/${user.id}/saved-posts`))
+            const isActive = (
+              (pathname==link.route) || (pathname===`/profile/${user.id}/saved-posts` && link.label=="Saved")
+              )
             return (
               <li key={link.label}
-                className={`leftsidebar-link group ${isActive && "bg-primary-500"}`}>
+                className={`leftsidebar-link group ${isActive && "bg-primary-500"} `}>
                 <NavLink to={link.label==="Saved"?`/profile/${user.id}/saved-posts`:link.route}
                   className="flex gap-4 items-center p-4"
                 >

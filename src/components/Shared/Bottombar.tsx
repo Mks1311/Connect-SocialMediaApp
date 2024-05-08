@@ -9,7 +9,9 @@ function Bottombar() {
   return (
     <section className='bottom-bar'>
       {bottombarLinks.map((link) => {
-        const isActive = pathname == link.route
+        const isActive = (
+          (pathname==link.route) || (pathname===`/profile/${user.id}/saved-posts` && link.label=="Saved")
+          )
         return (
           <Link to={link.label==="Saved"?`/profile/${user.id}/saved-posts`:link.route}
             key={`bottombar-${link.label}`}
