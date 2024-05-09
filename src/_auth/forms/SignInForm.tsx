@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { useToast } from "@/components/ui/use-toast"
+import { ToastAction } from "@/components/ui/toast"
 import {
   Form,
   FormControl,
@@ -64,7 +65,13 @@ function SignInForm() {
 
       if (!signIn) {
         setLoading(false)
-        toast({ title: "Something went wrong. Please try again", });
+        toast({
+          //varient not working
+          variant: "destructive",
+          title: "Sign in failed, Please try again.",
+          description: "There was a problem with your request.",
+          action: <ToastAction altText="Try again">Try again</ToastAction>,
+        })
         return;
       }
       const isLoggedIn = await authService.getCurrentUser();
@@ -78,7 +85,13 @@ function SignInForm() {
       else {
         setLoading(false)
         console.log("no logged in");
-        toast({ title: "Login failed. Please try again.", });
+        toast({
+          //varient not working
+          variant: "destructive",
+          title: "Sign in failed, Please try again.",
+          description: "There was a problem with your request.",
+          action: <ToastAction altText="Try again">Try again</ToastAction>,
+        })
         return;
       }
 

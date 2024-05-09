@@ -50,6 +50,7 @@ function SignUpForm() {
       console.log("SignInForm::getUserData::",error);
       
     }
+    setLoading(false)
   }
 
   useEffect(() => {
@@ -63,7 +64,7 @@ function SignUpForm() {
       const newUser = await authService.createUserAccount(values)
       if (!newUser) {
         console.log("no user");
-        
+        setLoading(false)
         return toast({
           //varient not working
           variant: "destructive",
@@ -78,6 +79,7 @@ function SignUpForm() {
       });
 
       if (!signIn) {
+        setLoading(false)
         toast({ title: "Something went wrong. Please login to your new account", });
         navigate("/");
         return;
@@ -85,20 +87,24 @@ function SignUpForm() {
       const isLoggedIn = await authService.getCurrentUser();
 
       if (isLoggedIn) {
+        setLoading(false)
         form.reset();
         navigate("/home");
       } 
       else {
+        setLoading(false)
         toast({ title: "Login failed. Please try again.", });
         return;
       }
     } catch (error) {
+      setLoading(false)
       console.log("sign-up form onsubmit", error);
     }
     setLoading(false)
   }
 
   return (
+    <div className="h-screen">
     <Form {...form}>
       <div className="sm:w-420 flex-center flex-col mx-3">
         <img className="m-2"
@@ -190,6 +196,7 @@ function SignUpForm() {
         </form>
       </div >
     </Form>
+    </div>
   )
 }
 

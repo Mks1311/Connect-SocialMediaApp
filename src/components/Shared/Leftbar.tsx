@@ -80,7 +80,7 @@ function Leftbar() {
 
         </ul>
       </div>
-      <Button variant="ghost" className=" shad-button_ghost hover:bg-primary-500 transition hover:stroke-white"
+      <Button variant="outline" className=" shad-button_ghost  transition hover:stroke-white"
         onClick={logoutClick}
       >
         {loading ? (
