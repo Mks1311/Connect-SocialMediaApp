@@ -23,26 +23,44 @@ import authService from "@/lib/appwrite/AuthService"
 
 type PostFormProps={
     post?:Models.Document
+    action: "Create" | "Update";
 }
 
-function PostForm({post}:PostFormProps) {
+function PostForm({post,action}:PostFormProps) {
     const form = useForm<z.infer<typeof PostValidation>>({
         resolver: zodResolver(PostValidation),
         defaultValues: {
             caption: post?post.caption:"",
             file:[],
             location:post?post?.location:"",
-            tags:post?post.tags.joint(','):""
+            tags:post?post.tags.join(','):""
 
         },
     })
 
     const {toast}=useToast();
     const navigate=useNavigate();
+    const displayTxt=(post && action === "Update")?"Update":"Post"
 
     const CurrentUser=useAppSelector((state)=>(state.auth.user))
 
     async function onSubmit(values: z.infer<typeof PostValidation>) {
+
+        if (post && action === "Update") {
+            const updatedPost = await authService.updatePost({
+              ...values,
+              postId: post.$id,
+              imageId: post.imageId,
+              imageUrl: post.imageUrl,
+            });
+      
+            if (!updatedPost) {
+              toast({
+                title: `${action} post failed. Please try again.`,
+              });
+            }
+            return navigate("/home");
+          }
         
         const newPost=await authService.createPost({
             ...values,
@@ -55,7 +73,11 @@ function PostForm({post}:PostFormProps) {
                 })
             )
         }
-        navigate('/')
+        navigate('/home')
+    }
+
+    function cancleHandle(){
+        navigate("/home")
     }
 
     return (
@@ -68,7 +90,7 @@ function PostForm({post}:PostFormProps) {
                         <FormItem>
                             <FormLabel className="shad-form_label">Caption</FormLabel>
                             <FormControl>
-                                <Textarea placeholder="shadcn" {...field} className="shad-textarea custom-scrollbar" />
+                                <Textarea placeholder="Caption" {...field} className="shad-textarea custom-scrollbar" />
                             </FormControl>
 
                             <FormMessage className="shad-form_message" />
@@ -122,8 +144,9 @@ function PostForm({post}:PostFormProps) {
                     )}
                 />
                 <div className="flex gap-4 items-center justify-end">
-                    <Button type="button" className="shad-button_dark_4">Cancel</Button>
-                    <Button type="submit" className="shad-button_primary whitespace-nowrap">Submit</Button>
+                    <Button type="button" className="shad-button_dark_4"
+                    onClick={cancleHandle}>Cancel</Button>
+                    <Button type="submit" className="shad-button_primary whitespace-nowrap">{displayTxt}</Button>
                 </div>
             </form>
         </Form>

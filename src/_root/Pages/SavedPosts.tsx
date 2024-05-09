@@ -16,10 +16,13 @@ function SavedPosts() {
             const currentData = await authService.getSavedPost()
             if (!currentData) {
                 console.log("Profile::userData::currentUserData");
+                setIsLoading(false)
             }
             setUserData(currentData)
+            setIsLoading(false)
         } catch (error) {
             console.log("Profile::userData::", error);
+            setIsLoading(false)
         }
         setIsLoading(false)
     }

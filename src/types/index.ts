@@ -1,18 +1,28 @@
 export type INavLink = {
-    imgURL: string;
-    route: string;
-    label: string;
-  };
-  
-  export type IUpdateUser = {
-    userId: string;
-    name: string;
-    bio: string;
-    imageId: string;
-    imageUrl: URL | string;
-    file: File[];
-  };
-  
+  imgURL: string;
+  route: string;
+  label: string;
+};
+
+export type IUpdateUser = {
+  userId: string;
+  name: string;
+  bio: string;
+  username:string;
+  imageId: string;
+  imageUrl: URL | string;
+  file: File[];
+};
+
+export type IUser = {
+  id: string;
+  name: string;
+  username: string;
+  email: string;
+  imageUrl: string;
+  bio: string;
+  imageId:string;
+};
   export type INewPost = {
     userId: string;
     caption: string;
@@ -31,14 +41,6 @@ export type INavLink = {
     tags?: string;
   };
   
-  export type IUser = {
-    id: string;
-    name: string;
-    username: string;
-    email: string;
-    imageUrl: string;
-    bio: string;
-  };
   
   export type INewUser = {
     name: string;

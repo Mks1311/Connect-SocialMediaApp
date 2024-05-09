@@ -18,13 +18,11 @@ import Loader from "@/components/Shared/Loader"
 import { Link , useNavigate } from "react-router-dom"
 import authService from "@/lib/appwrite/AuthService"
 import { useState } from "react"
-import { useAppSelector } from "@/hooks"
 
 function SignInForm() {
   const { toast } = useToast()
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const isAuth=useAppSelector((state=>state.auth.isAuthenticated))
 
   const form = useForm<z.infer<typeof SigninValidation>>({
     resolver: zodResolver(SigninValidation),
@@ -52,11 +50,7 @@ function SignInForm() {
   }
 
   useEffect(() => {
-    console.log(isAuth);
     getUserData()
-    if(isAuth){
-      navigate("/home")
-    }
   }, []);
 
   async function onSubmit(values: z.infer<typeof SigninValidation>) {

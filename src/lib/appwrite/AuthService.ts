@@ -1,7 +1,7 @@
 import config from "./config";
 import { Client, Account, ID, Avatars, Databases, Query, Storage, ImageGravity } from "appwrite";
-import { INewUser, INewPost } from "@/types";
-import { setLoading, setUser, setIsAuthenticated } from "@/features/auth/AuthSlice";
+import { INewUser, INewPost, IUpdatePost, IUpdateUser } from "@/types";
+import { setUser} from "@/features/auth/AuthSlice";
 import { store } from "@/store";
 
 
@@ -25,45 +25,124 @@ export class AuthService {
     }
 
     //USER
-    async getUserById(userId:string){
+    async getUserById(userId: string) {
         try {
-            const user=await this.databases.getDocument(
+            const user = await this.databases.getDocument(
                 config.appwriteDBId,
                 config.appwriteUserCollectionId,
                 userId
             )
-            if(!user) throw Error
+            if (!user) throw Error
             return user;
         } catch (error) {
-            console.log("AuthSerive::getUserById::",error);
-            
+            console.log("AuthSerive::getUserById::", error);
+
         }
     }
 
     async getUsers(limit?: number) {
         const queries: any[] = [Query.orderDesc("$createdAt")];
-      
+
         if (limit) {
-          queries.push(Query.limit(limit));
+            queries.push(Query.limit(limit));
         }
-      
+
         try {
-          const users = await this.databases.listDocuments(
-            config.appwriteDBId,
-            config.appwriteUserCollectionId,
-            queries
-          );
-      
-          if (!users) throw Error;
-      
-          return users;
+            const users = await this.databases.listDocuments(
+                config.appwriteDBId,
+                config.appwriteUserCollectionId,
+                queries
+            );
+
+            if (!users) throw Error;
+
+            return users;
         } catch (error) {
-          console.log(error);
+            console.log(error);
         }
-      }
+    }
 
 
     //POSTS
+
+    async updatePost(post: IUpdatePost) {
+        const hasFileToUpdate = post.file.length > 0;
+
+        try {
+            let image = {
+                imageUrl: post.imageUrl,
+                imageId: post.imageId,
+            };
+
+            if (hasFileToUpdate) {
+                // Upload new file to appwrite storage
+                const uploadedFile = await this.uploadFile(post.file[0]);
+                if (!uploadedFile) throw Error;
+
+                // Get new file url
+                const fileUrl = await this.getFilePreview(uploadedFile.$id);
+                if (!fileUrl) {
+                    await this.deleteFile(uploadedFile.$id);
+                    throw Error;
+                }
+
+                image = { ...image, imageUrl: fileUrl, imageId: uploadedFile.$id };
+            }
+
+            // Convert tags into array
+            const tags = post.tags?.replace(/ /g, "").split(",") || [];
+
+            //  Update post
+            const updatedPost = await this.databases.updateDocument(
+                config.appwriteDBId,
+                config.appwritePostCollectionId,
+                post.postId,
+                {
+                    caption: post.caption,
+                    imageUrl: image.imageUrl,
+                    imageId: image.imageId,
+                    location: post.location,
+                    tags: tags,
+                }
+            );
+
+            // Failed to update
+            if (!updatedPost) {
+                // Delete new file that has been recently uploaded
+                if (hasFileToUpdate) {
+                    await this.deleteFile(image.imageId);
+                }
+
+                // If no new file uploaded, just throw error
+                throw Error;
+            }
+
+            // Safely delete old file after successful update
+            if (hasFileToUpdate) {
+                await this.deleteFile(post.imageId);
+            }
+
+            return updatedPost;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async getPostById(postId: string) {
+        try {
+            const user = await this.databases.getDocument(
+                config.appwriteDBId,
+                config.appwritePostCollectionId,
+                postId
+            )
+            if (!user) throw Error
+            return user;
+        } catch (error) {
+            console.log("AuthSerive::getPostById::", error);
+
+        }
+    }
+
     async uploadFile(file: File) {
         try {
             const uploadedFile = await this.storage.createFile(
@@ -199,7 +278,7 @@ export class AuthService {
                 {
                     user: userId,
                     post: postId,
-                    userId:userId,
+                    userId: userId,
                 }
             );
 
@@ -212,8 +291,8 @@ export class AuthService {
     }
 
     async deleteSavePost(savedRecordId: string) {
-        console.log("savedRecordId",savedRecordId);
-        
+        console.log("savedRecordId", savedRecordId);
+
         try {
             const statusCode = await this.databases.deleteDocument(
                 config.appwriteDBId,
@@ -230,7 +309,7 @@ export class AuthService {
         }
     }
 
-    async getSavedPost(){
+    async getSavedPost() {
         try {
             const currentUser = await this.account.get();
             if (!currentUser) {
@@ -245,18 +324,74 @@ export class AuthService {
                 console.log("Error :: Appwrite Service :: getSavedPost :: currentUser");
                 throw Error
             }
-            console.log("getSavedPost",currentUserData);            
+            console.log("getSavedPost", currentUserData);
             return currentUserData
         } catch (error) {
-            console.log("Authservice::getSavedPost::",error);
+            console.log("Authservice::getSavedPost::", error);
         }
     }
 
     //AUTHORIZATION
 
+    async updateUser(user: IUpdateUser) {
+        const hasFileToUpdate = user.file.length > 0;
+        try {
+            let image = {
+                imageUrl: user.imageUrl,
+                imageId: user.imageId,
+            };
+
+            if (hasFileToUpdate) {
+                // Upload new file to appwrite storage
+                const uploadedFile = await this.uploadFile(user.file[0]);
+                if (!uploadedFile) throw Error;
+
+                // Get new file url
+                const fileUrl = await this.getFilePreview(uploadedFile.$id);
+                if (!fileUrl) {
+                    await this.deleteFile(uploadedFile.$id);
+                    throw Error;
+                }
+
+                image = { ...image, imageUrl: fileUrl, imageId: uploadedFile.$id };
+            }
+
+            //  Update user
+            const updatedUser = await this.databases.updateDocument(
+                config.appwriteDBId,
+                config.appwriteUserCollectionId,
+                user.userId,
+                {
+                    name: user.name,
+                    bio: user.bio,
+                    username:user.username,
+                    imageUrl: image.imageUrl,
+                    imageId: image.imageId,
+                }
+            );
+
+            // Failed to update
+            if (!updatedUser) {
+                // Delete new file that has been recently uploaded
+                if (hasFileToUpdate) {
+                    await this.deleteFile(image.imageId);
+                }
+                // If no new file uploaded, just throw error
+                throw Error;
+            }
+
+            // Safely delete old file after successful update
+            if (user.imageId && hasFileToUpdate) {
+                await this.deleteFile(user.imageId);
+            }
+
+            return updatedUser;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
     async createUserAccount(user: INewUser) {
-        const { dispatch } = store
-        dispatch(setLoading(true));
         try {
             const newAccount = await this.account.create(
                 ID.unique(),
@@ -281,8 +416,6 @@ export class AuthService {
             }
             return newUser;
         } catch (error) {
-            const { dispatch } = store
-            dispatch(setLoading(false));
             console.log("Error :: Appwrite Service :: createAccount", (error));
         }
     }
@@ -336,20 +469,17 @@ export class AuthService {
             }
             return currentAccount
         }
-        catch(error){
-            console.log("Authservice::getCurrentUserData::",error);
-            
+        catch (error) {
+            console.log("Authservice::getCurrentUserData::", error);
+
         }
     }
-
-
 
     async getCurrentUser() {
         // const dispatch=useDispatch<useAppDispatch>();
         //cant pass hook direclty in class component
         try {
             const { dispatch } = store
-            dispatch(setLoading(true));
             const currentAccount = await this.getCurrentUserData()
             if (currentAccount) {
                 dispatch(setUser({
@@ -359,14 +489,13 @@ export class AuthService {
                     email: currentAccount?.email,
                     imageUrl: currentAccount?.imageUrl,
                     bio: currentAccount?.bio,
+                    imageId:currentAccount?.imageId || "",
                 }));
-                dispatch(setIsAuthenticated(true));
             }
             else {
                 console.log("getCurrentUser::no currenctAccount");
 
             }
-            dispatch(setLoading(false));
             return true;
         } catch (error) {
             console.log("Error :: Appwrite Service :: getCurrentUser", error);
@@ -385,8 +514,8 @@ export class AuthService {
                 email: '',
                 imageUrl: '',
                 bio: '',
+                imageId:'',
             }))
-            dispatch(setIsAuthenticated(false))
             return true
         } catch (error) {
             console.log("Error :: Appwrite Service :: LogOut", error);
