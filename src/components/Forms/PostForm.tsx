@@ -19,64 +19,70 @@ import { useAppSelector } from "@/hooks"
 import { useToast } from "../ui/use-toast"
 import { useNavigate } from "react-router-dom"
 import authService from "@/lib/appwrite/AuthService"
+import { useState } from "react"
+import Loader from "../Shared/Loader"
 
 
-type PostFormProps={
-    post?:Models.Document
+type PostFormProps = {
+    post?: Models.Document
     action: "Create" | "Update";
 }
 
-function PostForm({post,action}:PostFormProps) {
+function PostForm({ post, action }: PostFormProps) {
     const form = useForm<z.infer<typeof PostValidation>>({
         resolver: zodResolver(PostValidation),
         defaultValues: {
-            caption: post?post.caption:"",
-            file:[],
-            location:post?post?.location:"",
-            tags:post?post.tags.join(','):""
+            caption: post ? post.caption : "",
+            file: [],
+            location: post ? post?.location : "",
+            tags: post ? post.tags.join(',') : ""
 
         },
     })
+    const [loading, isLoading] = useState(false)
+    const { toast } = useToast();
+    const navigate = useNavigate();
+    const displayTxt = (post && action === "Update") ? "Update" : "Post"
 
-    const {toast}=useToast();
-    const navigate=useNavigate();
-    const displayTxt=(post && action === "Update")?"Update":"Post"
-
-    const CurrentUser=useAppSelector((state)=>(state.auth.user))
+    const CurrentUser = useAppSelector((state) => (state.auth.user))
 
     async function onSubmit(values: z.infer<typeof PostValidation>) {
-
+        isLoading(true)
         if (post && action === "Update") {
             const updatedPost = await authService.updatePost({
-              ...values,
-              postId: post.$id,
-              imageId: post.imageId,
-              imageUrl: post.imageUrl,
+                ...values,
+                postId: post.$id,
+                imageId: post.imageId,
+                imageUrl: post.imageUrl,
             });
-      
+
             if (!updatedPost) {
-              toast({
-                title: `${action} post failed. Please try again.`,
-              });
+                isLoading(false)
+                toast({
+                    title: `${action} post failed. Please try again.`,
+                });
             }
+            isLoading(false)
             return navigate("/home");
-          }
-        
-        const newPost=await authService.createPost({
+        }
+
+        const newPost = await authService.createPost({
             ...values,
-            userId:CurrentUser.id,
+            userId: CurrentUser.id,
         })
-        if(!newPost){
+        if (!newPost) {
+            isLoading(false)
             return (
                 toast({
-                    title:"Please try again",
+                    title: "Please try again",
                 })
             )
         }
+        isLoading(false)
         navigate('/home')
     }
 
-    function cancleHandle(){
+    function cancleHandle() {
         navigate("/home")
     }
 
@@ -104,9 +110,9 @@ function PostForm({post,action}:PostFormProps) {
                         <FormItem>
                             <FormLabel className="shad-form_label">Add Photos</FormLabel>
                             <FormControl>
-                                <FileUploader 
-                                fieldChange={field.onChange}
-                                mediaUrl={post?.imageUrl}
+                                <FileUploader
+                                    fieldChange={field.onChange}
+                                    mediaUrl={post?.imageUrl}
                                 />
                             </FormControl>
 
@@ -145,8 +151,15 @@ function PostForm({post,action}:PostFormProps) {
                 />
                 <div className="flex gap-4 items-center justify-end">
                     <Button type="button" className="shad-button_dark_4"
-                    onClick={cancleHandle}>Cancel</Button>
-                    <Button type="submit" className="shad-button_primary whitespace-nowrap">{displayTxt}</Button>
+                        onClick={cancleHandle}>Cancel</Button>
+                    <Button type="submit" className="shad-button_primary whitespace-nowrap"
+                    >{
+                        loading?(
+                            <Loader/>
+                        ):
+                        (displayTxt)
+                    }
+                    </Button>
                 </div>
             </form>
         </Form>
