@@ -65,6 +65,26 @@ export class AuthService {
 
     //POSTS
 
+    async deletePost(postId?: string, imageId?: string) {
+        if (!postId || !imageId) return;
+      
+        try {
+          const statusCode = await this.databases.deleteDocument(
+            config.appwriteDBId,
+            config.appwritePostCollectionId,
+            postId
+          );
+      
+          if (!statusCode) throw Error;
+      
+          await this.deleteFile(imageId);
+      
+          return { status: "Ok" };
+        } catch (error) {
+          console.log(error);
+        }
+      }
+
     async updatePost(post: IUpdatePost) {
         const hasFileToUpdate = post.file.length > 0;
 
@@ -334,6 +354,7 @@ export class AuthService {
     //AUTHORIZATION
 
     async updateUser(user: IUpdateUser) {
+        const {dispatch}=store
         const hasFileToUpdate = user.file.length > 0;
         try {
             let image = {
@@ -384,6 +405,9 @@ export class AuthService {
             if (user.imageId && hasFileToUpdate) {
                 await this.deleteFile(user.imageId);
             }
+            // dispatch(setUser({
+
+            // }))
 
             return updatedUser;
         } catch (error) {

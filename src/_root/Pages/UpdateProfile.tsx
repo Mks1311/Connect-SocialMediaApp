@@ -49,12 +49,13 @@ function UpdateProfile() {
     }
 
     dispatch(setUser({
-      ...currentUser,
+      id:currentUser?.id,
       name:updatedUser?.name,
-      bio: updatedUser?.bio,
-      imageUrl: updatedUser?.imageUrl,
-      imageId:updatedUser?.imageId,
       username:updatedUser?.username,
+      email:currentUser?.email,
+      imageUrl: updatedUser?.imageUrl,
+      bio: updatedUser?.bio,
+      imageId:updatedUser?.imageId,
     }))
     setIsLoadingUpdate(false)
     return navigate(`/profile/${id}`);

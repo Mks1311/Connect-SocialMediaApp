@@ -1,5 +1,5 @@
 import { Models } from "appwrite";
-import { Link} from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 import PostStats from "@/components/Shared/PostStats"
 import { useAppSelector } from "@/hooks";
@@ -16,18 +16,33 @@ const GridPostList = ({
   showStats = true,
 }: GridPostListProps) => {
   const user = useAppSelector((state) => state.auth.user)
+  const { pathname } = useLocation()
+  const shouldLink = (pathname == `/profile/${user.id}`)
   posts?.reverse();
   return (
     <ul className="grid-container">
       {posts?.map((post) => (
+
         <li key={post?.$id} className="relative min-w-80 h-80">
-          <Link to={`/posts/${post?.$id}`} className="grid-post_link">
-            <img
-              src={post?.imageUrl}
-              alt="post"
-              className="h-full w-full object-contain"
-            />
-          </Link>
+
+          {
+            shouldLink ? (
+              <Link to={`/update-post/${post?.$id}`}>
+                <img
+                  src={post?.imageUrl}
+                  alt="post"
+                  className="h-full w-full object-contain"
+                />
+              </Link>
+            ) : (
+              <img
+                src={post?.imageUrl}
+                alt="post"
+                className="h-full w-full object-contain"
+              />
+            )
+          }
+
 
           <div className="grid-post_user">
             {showUser && (
@@ -47,7 +62,7 @@ const GridPostList = ({
                   <p className="line-clamp-1">{post?.creator?.name}</p>
                 </Link>
               </div>
-              
+
             )}
             {showStats && <PostStats post={post} userId={user?.id} />}
           </div>

@@ -18,7 +18,7 @@ function PostCard({ post }: PostCardProps) {
                 <div className="flex items-center gap-3">
                     <Link to={`/profile/${post?.creator?.$id}`}>
                         <img
-                            src={post?.creator?.imageUrl || "Icons/profile-placeholder.svg"}
+                            src={post?.creator?.imageUrl || "/Icons/profile-placeholder.svg"}
                             alt="creator"
                             className="rounded-full w-12 lg:hg-12"
                         />
@@ -44,7 +44,7 @@ function PostCard({ post }: PostCardProps) {
                     <img src="Icons/edit.svg" alt="edit" width={20} />
                 </Link>
             </div>
-            <Link to={`/post/${post?.$id}`}>
+
                 <div className="small-medium lg:base-medium py-5">
                     <p>{post?.caption}</p>
                     <ul>
@@ -62,7 +62,6 @@ function PostCard({ post }: PostCardProps) {
                     className="post-card_img"
                     alt="post image"
                 />
-            </Link>
 
             <PostStats post={post} userId={user.id} />
         </div>
