@@ -354,7 +354,6 @@ export class AuthService {
     //AUTHORIZATION
 
     async updateUser(user: IUpdateUser) {
-        const {dispatch}=store
         const hasFileToUpdate = user.file.length > 0;
         try {
             let image = {
