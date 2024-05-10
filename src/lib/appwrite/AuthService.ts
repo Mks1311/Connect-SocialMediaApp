@@ -1,7 +1,7 @@
 import config from "./config";
 import { Client, Account, ID, Avatars, Databases, Query, Storage, ImageGravity } from "appwrite";
 import { INewUser, INewPost, IUpdatePost, IUpdateUser } from "@/types";
-import { setUser} from "@/features/auth/AuthSlice";
+import { setUser } from "@/features/auth/AuthSlice";
 import { store } from "@/store";
 
 
@@ -67,23 +67,23 @@ export class AuthService {
 
     async deletePost(postId?: string, imageId?: string) {
         if (!postId || !imageId) return;
-      
+
         try {
-          const statusCode = await this.databases.deleteDocument(
-            config.appwriteDBId,
-            config.appwritePostCollectionId,
-            postId
-          );
-      
-          if (!statusCode) throw Error;
-      
-          await this.deleteFile(imageId);
-      
-          return { status: "Ok" };
+            const statusCode = await this.databases.deleteDocument(
+                config.appwriteDBId,
+                config.appwritePostCollectionId,
+                postId
+            );
+
+            if (!statusCode) throw Error;
+
+            await this.deleteFile(imageId);
+
+            return { status: "Ok" };
         } catch (error) {
-          console.log(error);
+            console.log(error);
         }
-      }
+    }
 
     async updatePost(post: IUpdatePost) {
         const hasFileToUpdate = post.file.length > 0;
@@ -351,6 +351,46 @@ export class AuthService {
         }
     }
 
+    async getPosts(pageParam:string) {
+        console.log("pageParam",pageParam);
+        
+        const queries: any[] = [Query.limit(3)];
+        if (pageParam) {
+            queries.push(Query.cursorAfter(pageParam));
+        }
+        console.log("AuthSerive",queries);
+        
+        try {
+            const posts = await this.databases.listDocuments(
+                config.appwriteDBId,
+                config.appwritePostCollectionId,
+                queries
+            );
+
+            if (!posts) throw Error;
+            console.log(posts);
+            return posts;
+        } catch (error) {
+            console.log("AuthSerive::getInfintePost::", error);
+        }
+    }
+
+    async searchPosts(searchTerm: string) {
+        try {
+            const posts = await this.databases.listDocuments(
+                config.appwriteDBId,
+                config.appwritePostCollectionId,
+                [Query.search("caption", searchTerm)]
+            );
+
+            if (!posts) throw Error;
+
+            return posts;
+        } catch (error) {
+            console.log("AuthService::searchPosts::", error);
+        }
+    }
+
     //AUTHORIZATION
 
     async updateUser(user: IUpdateUser) {
@@ -384,7 +424,7 @@ export class AuthService {
                 {
                     name: user.name,
                     bio: user.bio,
-                    username:user.username,
+                    username: user.username,
                     imageUrl: image.imageUrl,
                     imageId: image.imageId,
                 }
@@ -512,7 +552,7 @@ export class AuthService {
                     email: currentAccount?.email,
                     imageUrl: currentAccount?.imageUrl,
                     bio: currentAccount?.bio,
-                    imageId:currentAccount?.imageId || "",
+                    imageId: currentAccount?.imageId || "",
                 }));
             }
             else {
@@ -537,7 +577,7 @@ export class AuthService {
                 email: '',
                 imageUrl: '',
                 bio: '',
-                imageId:'',
+                imageId: '',
             }))
             return true
         } catch (error) {

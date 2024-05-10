@@ -10,7 +10,7 @@ type PostStatProps = {
 }
 
 function PostStats({ post, userId }: PostStatProps) {
-  console.log("post",post?.creator?.username);
+  // console.log("post",post?.creator?.username);
   
   const [isSaved, isSetSaved] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -21,16 +21,16 @@ function PostStats({ post, userId }: PostStatProps) {
     setIsLoading(true)
     try {
       currentUserData = await authService.getCurrentUserData();
-      console.log("getUserData", currentUserData);
+      // console.log("getUserData", currentUserData);
       if (!currentUserData) {
         console.log("PostStats::currentUserData::in try");
       } else {
         const savedPostRecord = (currentUserData?.saves?.find(
           (record: Models.Document) => record.post.$id === post.$id
         ));
-        console.log("savedPostRecord", savedPostRecord?.$id);
+        // console.log("savedPostRecord", savedPostRecord?.$id);
         setPostId(savedPostRecord?.$id)
-        console.log("postId",postId);
+        // console.log("postId",postId);
         
         isSetSaved(savedPostRecord === undefined ? false : true)
       }
@@ -84,7 +84,7 @@ function PostStats({ post, userId }: PostStatProps) {
       
       return authService.deleteSavePost(postId);
     }
-    console.log("PostStats::hanldeSave",post);
+    // console.log("PostStats::hanldeSave",post);
     
     authService.SavePost(userId, post.$id);
     isSetSaved(true);
