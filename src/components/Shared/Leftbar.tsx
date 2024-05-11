@@ -15,7 +15,6 @@ function Leftbar() {
   const navigate = useNavigate()
   const user = useAppSelector((state) => state.auth.user)
   const [loading, setLoading] = useState(false);
-  console.log("pathname",pathname);
   
 
   async function logoutClick() {

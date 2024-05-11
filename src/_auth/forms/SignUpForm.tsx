@@ -39,7 +39,6 @@ function SignUpForm() {
     setLoading(true);
     try {
       const currentUser=await authService.getCurrentUserData()
-      console.log(currentUser);
       if(currentUser){
         navigate("/home")
       }
@@ -63,7 +62,6 @@ function SignUpForm() {
     try {
       const newUser = await authService.createUserAccount(values)
       if (!newUser) {
-        console.log("no user");
         setLoading(false)
         return toast({
           //varient not working

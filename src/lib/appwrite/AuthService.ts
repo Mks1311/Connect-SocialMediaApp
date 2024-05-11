@@ -170,10 +170,6 @@ export class AuthService {
                 ID.unique(),
                 file
             );
-
-            console.log("uploadFile ::", uploadedFile);
-
-
             return uploadedFile;
         }
         catch (error) {
@@ -321,8 +317,6 @@ export class AuthService {
     }
 
     async deleteSavePost(savedRecordId: string) {
-        console.log("savedRecordId", savedRecordId);
-
         try {
             const statusCode = await this.databases.deleteDocument(
                 config.appwriteDBId,
@@ -354,7 +348,6 @@ export class AuthService {
                 console.log("Error :: Appwrite Service :: getSavedPost :: currentUser");
                 throw Error
             }
-            console.log("getSavedPost", currentUserData);
             return currentUserData
         } catch (error) {
             console.log("Authservice::getSavedPost::", error);
@@ -367,7 +360,6 @@ export class AuthService {
         if (pageParam) {
             queries.push(Query.cursorAfter(pageParam.toString()));
         }
-        console.log("AuthSerive",queries);
         
         try {
             const posts = await this.databases.listDocuments(
@@ -496,12 +488,9 @@ export class AuthService {
         email: string,
         password: string
     }) {
-        console.log("authservice :: log in", user.email, user.password);
         try {
             const session = await this.account.createEmailPasswordSession(user.email, user.password);
             if (session) {
-                console.log("in session", session);
-
                 const userdata = await this.getCurrentUser()
                 if (!userdata) {
                     console.log("userData::LogIn::AuthService", userdata);

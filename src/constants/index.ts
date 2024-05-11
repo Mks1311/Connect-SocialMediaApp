@@ -38,9 +38,9 @@ export const sidebarLinks = [
       label: "Explore",
     },
     {
-      imgURL: "/Icons/bookmark.svg",
-      route: "/saved",
-      label: "Saved",
+      imgURL: "/Icons/people.svg",
+      route: "/all-users",
+      label: "People",
     },
     {
       imgURL: "/Icons/gallery-add.svg",

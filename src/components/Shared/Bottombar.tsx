@@ -13,7 +13,7 @@ function Bottombar() {
           (pathname==link.route) || (pathname===`/profile/${user.id}/saved-posts` && link.label=="Saved")
           )
         return (
-          <Link to={link.label==="Saved"?`/profile/${user.id}/saved-posts`:link.route}
+          <Link to={link.route}
             key={`bottombar-${link.label}`}
             className={`${
               isActive && "rounded-[10px] bg-primary-500 "

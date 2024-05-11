@@ -37,7 +37,6 @@ function SignInForm() {
     setLoading(true);
     try {
       const currentUser=await authService.getCurrentUserData()
-      console.log(currentUser);
       if(currentUser){
         navigate("/home")
       }
@@ -78,13 +77,11 @@ function SignInForm() {
 
       if (isLoggedIn) {
         setLoading(false)
-        console.log("logged in");11
         form.reset();
         navigate("/home");
       } 
       else {
         setLoading(false)
-        console.log("no logged in");
         toast({
           //varient not working
           variant: "destructive",

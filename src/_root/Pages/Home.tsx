@@ -23,7 +23,6 @@ function Home() {
         documents: mergedDocuments,
       })
     }
-    console.log("lastId", lastId);
   };
 
   async function getCurrentposts() {

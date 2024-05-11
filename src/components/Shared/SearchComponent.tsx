@@ -17,7 +17,6 @@ function SearchComponent({ srcValue }:any) {
       console.log("Explore::search::searchPost")
     }
     setSearchedPosts(searchPost)
-    console.log(searchPost);
     
     setIsSearching(false)
     return searchPost

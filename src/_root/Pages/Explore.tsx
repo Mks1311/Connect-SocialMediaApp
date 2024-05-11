@@ -13,7 +13,6 @@ function Explore() {
   const [lastId, setLastId] = useState<any>("")
 
   const addDocument = (newDocument: any) => {
-    console.log(PostData);
     if (PostData.documents.length == 0) {
       setPostData({
         total: newDocument.total,
@@ -27,12 +26,10 @@ function Explore() {
         documents: mergedDocuments,
       })
     }
-    console.log("lastId", lastId);
   };
 
   async function getPostData() {
     try {
-      console.log("last", lastId);
       const post = await authService.getPosts(lastId)
       if (!post) {
         console.log("Profile::userData::currentUserData");
@@ -42,7 +39,6 @@ function Explore() {
         setLoadmore(false)
       }
       setLastId(post?.documents[post?.documents?.length-1].$id)
-      console.log("PostData", PostData);
     } catch (error) {
       console.log("Explore::userData::", error);
     }
