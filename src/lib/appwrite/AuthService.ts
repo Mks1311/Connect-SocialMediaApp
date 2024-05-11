@@ -257,16 +257,26 @@ export class AuthService {
         }
     }
 
-    async getRecentPost() {
-        const posts = await this.databases.listDocuments(
-            config.appwriteDBId,
-            config.appwritePostCollectionId,
-            [Query.orderDesc("$createdAt"), Query.limit(20)]
-        )
-        if (!posts) {
-            console.log("AuthService::getRecentPost::")
+    async getRecentPost(pageParam:any) {
+        const queries: any[] = [Query.limit(6),Query.orderDesc("$updatedAt")];
+        if (pageParam) {
+            queries.push(Query.cursorAfter(pageParam.toString()));
         }
-        return posts;
+        try {
+            const posts = await this.databases.listDocuments(
+                config.appwriteDBId,
+                config.appwritePostCollectionId,
+                queries
+            )
+            if (!posts) {
+                console.log("AuthService::getRecentPost::listDocuments")
+            }
+            return posts;
+            
+        } catch (error) {
+            console.log("AuthService::getRecentPost::",error)
+        }
+        
     }
 
     async LikePost(postId: string, likesArr: string[]) {
@@ -351,12 +361,11 @@ export class AuthService {
         }
     }
 
-    async getPosts(pageParam:string) {
-        console.log("pageParam",pageParam);
-        
-        const queries: any[] = [Query.limit(3)];
+    async getPosts(pageParam:any) {        
+        const queries: any[] = [Query.limit(3),Query.orderDesc("$updatedAt")];
+
         if (pageParam) {
-            queries.push(Query.cursorAfter(pageParam));
+            queries.push(Query.cursorAfter(pageParam.toString()));
         }
         console.log("AuthSerive",queries);
         
